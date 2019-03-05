@@ -1,0 +1,25 @@
+<h1>{{title}}</h1>
+
+<div class="users">
+
+    {{#users}}
+        <section>
+            <header class="user-header">
+                <div class="user-meta">
+                    <strong>{{firstname}} {{lastname}}</strong>
+                    , with login name <strong>{{login}}</strong>
+                    {{#description}}
+                        <b>{{description}}</b>
+                    {{/description}}
+
+                    {{^description}}
+                        No description
+                    {{/description}}
+
+                </div>
+            </header>
+        </section>
+    {{/users}}
+</div>
+
+{{> footer}}
