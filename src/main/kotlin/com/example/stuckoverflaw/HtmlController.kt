@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.servlet.ModelAndView
 
 @Controller
-class HtmlController(private val postRepo : PostRepository, private  val userRepo : UserRepository)
+class HtmlController(private val postRepo : PostRepository, private val userRepo : UserRepository)
 {
     @GetMapping("/")
     fun home(model: Model) : String
@@ -60,14 +60,12 @@ class HtmlController(private val postRepo : PostRepository, private  val userRep
     }
 
     @PostMapping("/sequences")
-    fun sequencesSubmit(@ModelAttribute theForm: TheForm) : ModelAndView
+    fun sequencesSubmit(@ModelAttribute sequenceForm: SequenceForm) : ModelAndView
     {
         var mv = ModelAndView()
 
-        //mv.addObject("number",theForm.sequenceID)
-
-        var id = theForm.sequenceID.toInt()
-        var size = theForm.sequenceSize.toInt()
+        var id = sequenceForm.sequenceID.toInt()
+        var size = sequenceForm.sequenceSize.toInt()
 
         var sequence = generateSequence(id) {it + id}
 
@@ -78,6 +76,51 @@ class HtmlController(private val postRepo : PostRepository, private  val userRep
         return mv
     }
 
+    @GetMapping("/register")
+    fun register(model: Model): String
+    {
+        model["title"] = "Stuckoverflaw register"
+
+        return "register"
+    }
+
+    @PostMapping("/register")
+    fun registerSubmit(@ModelAttribute registerForm: RegisterForm) : ModelAndView
+    {
+        var mv = ModelAndView()
+
+        if(registerForm.firstname != "" && registerForm.lastname != "" && registerForm.login != "")
+        {
+            userRepo.save(User(registerForm.login, registerForm.firstname, registerForm.lastname, registerForm.description))
+        }
+
+        mv.viewName = "register"
+
+        return mv
+    }
+
+    @GetMapping("/postwriting")
+    fun postwriting(model: Model): String
+    {
+        model["title"] = "Stuckoverflaw write post"
+
+        return "writepost"
+    }
+
+    @PostMapping("/postwriting")
+    fun postwritingSubmit(@ModelAttribute postWriting: PostWriting) : ModelAndView
+    {
+        var mv = ModelAndView()
+
+       if(postWriting.title != "" && postWriting.content != "" && postWriting.headline != "")
+       {
+            postRepo.save(Post(postWriting.title, postWriting.headline, postWriting.content, userRepo.findByLogin("dodo")))
+       }
+
+        mv.viewName = "writepost"
+
+        return mv
+    }
 
     fun getCategory(contentLix : Int) : String
     {
@@ -110,5 +153,9 @@ class HtmlController(private val postRepo : PostRepository, private  val userRep
             val author: User,
             val addedAt: String)
 
-    data class TheForm(val sequenceID: Number, val sequenceSize: Number)
+    data class SequenceForm(val sequenceID: Number, val sequenceSize: Number)
+
+    data class RegisterForm(val firstname : String, val lastname : String, val login : String, val description : String?)
+
+    data class PostWriting( var title: String, var headline: String, var content: String)
 }
