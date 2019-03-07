@@ -68,7 +68,7 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
     fun sequencesSubmit(@ModelAttribute sequenceForm: SequenceForm) : ModelAndView
     {
         var mv = ModelAndView()
-
+        mv.addObject("title", "Stuckoverflaw sequences")
         if(sequenceForm.sequenceID != null && sequenceForm.sequenceSize != null) {
             var id = sequenceForm.sequenceID.toInt()
             var size = sequenceForm.sequenceSize.toInt()
@@ -94,7 +94,7 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
     fun registerSubmit(@ModelAttribute registerForm: RegisterForm) : ModelAndView
     {
         var mv = ModelAndView()
-
+        mv.addObject("title", "Stuckoverflaw register")
         if(registerForm.firstname != "" && registerForm.lastname != "" && registerForm.login != "")
         {
             userRepo.save(User(registerForm.login, registerForm.firstname, registerForm.lastname, registerForm.description))
@@ -117,7 +117,7 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
     fun postwritingSubmit(@ModelAttribute postWriting: PostWriting) : ModelAndView
     {
         var mv = ModelAndView()
-
+        mv.addObject("title", "Stuckoverflaw write post")
        if(postWriting.title != "" && postWriting.content != "" && postWriting.headline != "")
        {
             postRepo.save(Post(postWriting.title, postWriting.headline, postWriting.content, userRepo.findByLogin("dodo")))
@@ -162,6 +162,7 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
 
             mv.addObject("valutaConvertion", valuta)
         }
+
         mv.viewName = "valuta"
         return mv
     }
