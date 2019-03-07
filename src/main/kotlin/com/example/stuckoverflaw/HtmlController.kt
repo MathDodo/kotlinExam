@@ -12,6 +12,11 @@ import org.springframework.web.servlet.ModelAndView
 @Controller
 class HtmlController(private val postRepo : PostRepository, private val userRepo : UserRepository)
 {
+    val valutaConverter = ValutaConverter()
+    val euro = valutaConverter::kronerToEuro
+    val dollar = valutaConverter::kronerToDollar
+    val pound = valutaConverter::kronerToPound
+
     @GetMapping("/")
     fun home(model: Model) : String
     {
@@ -64,13 +69,14 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
     {
         var mv = ModelAndView()
 
-        var id = sequenceForm.sequenceID.toInt()
-        var size = sequenceForm.sequenceSize.toInt()
+        if(sequenceForm.sequenceID != null && sequenceForm.sequenceSize != null) {
+            var id = sequenceForm.sequenceID.toInt()
+            var size = sequenceForm.sequenceSize.toInt()
 
-        var sequence = generateSequence(id) {it + id}
+            var sequence = generateSequence(id) { it + id }
 
-        mv.addObject("sequence", "Result: " + sequence.take(size).joinToString())
-
+            mv.addObject("sequence", "Result: " + sequence.take(size).joinToString())
+        }
         mv.viewName = "sequencer"
 
         return mv
@@ -122,6 +128,44 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
         return mv
     }
 
+    @GetMapping("/valutaCalc")
+    fun valutaCalc(model: Model): String
+    {
+        model["title"] = "Stuckoverflaw write post"
+
+        return "valuta"
+    }
+
+    @PostMapping("/valutaCalc")
+    fun valutaSubmit(@ModelAttribute convertion: Convertion) : ModelAndView
+    {
+        var mv = ModelAndView()
+
+        mv.addObject("title", "Stuckoverflaw write post")
+
+        var valuta = "Valuta convertion from " + convertion.crowns.toString() + " to "
+
+        if(convertion.crowns != null) {
+            val array = valutaConverter.outputConversion(euro, dollar, pound, value = convertion.crowns.toDouble())
+
+            if (convertion.toDollar != null && convertion.toDollar) {
+                valuta += " to american dollar is: $" + array[1].toString() + " "
+            }
+
+            if (convertion.toEuro != null && convertion.toEuro) {
+                valuta += " german euro is: " + array[0].toString() + " "
+            }
+
+            if (convertion.toPound != null && convertion.toPound) {
+                valuta += " english pound is: £" + array[2].toString() + " "
+            }
+
+            mv.addObject("valutaConvertion", valuta)
+        }
+        mv.viewName = "valuta"
+        return mv
+    }
+
     fun getCategory(contentLix : Int) : String
     {
         //Switch case on contentLix with ranges and zero which is returned when there is text or no dots
@@ -153,9 +197,41 @@ class HtmlController(private val postRepo : PostRepository, private val userRepo
             val author: User,
             val addedAt: String)
 
-    data class SequenceForm(val sequenceID: Number, val sequenceSize: Number)
+    data class SequenceForm(val sequenceID: Number?, val sequenceSize: Number?)
 
     data class RegisterForm(val firstname : String, val lastname : String, val login : String, val description : String?)
 
-    data class PostWriting( var title: String, var headline: String, var content: String)
+    data class PostWriting(var title: String, val headline: String, val content: String)
+
+    data class Convertion(val crowns : Number?, val toDollar : Boolean?, val toPound : Boolean?, val toEuro : Boolean?)
+
+    class ValutaConverter()
+    {
+        fun outputConversion(vararg convertFunctions : (Double) -> Double, value: Double) : DoubleArray
+        {
+            var array = DoubleArray(convertFunctions.size)
+
+            for (i in 0 until ( convertFunctions.size))
+            {
+                array[i] = convertFunctions[i](value)
+            }
+
+            return array
+        }
+
+        fun kronerToDollar(kroner: Double) : Double
+        {
+            return kroner / 6.6263
+        }
+
+        fun kronerToPound(kroner: Double) : Double
+        {
+            return kroner / 8.4846
+        }
+
+        fun kronerToEuro(kroner: Double) : Double
+        {
+            return kroner / 7.4612
+        }
+    }
 }

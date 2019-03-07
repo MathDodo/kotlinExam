@@ -1,0 +1,34 @@
+{{> header}}
+<form action="" name="convert" method="post">
+<p>
+    Danish crowns
+    <br>
+    <input type="number" name="crowns" min="1" value="1"/>
+</p>
+
+<label class="switch">
+    Convert to dollars?
+    <input type="checkbox" name="toDollar" checked>
+</label>
+    <br>
+    <label class="switch">
+        Convert to euro?
+        <input type="checkbox" name="toEuro" checked>
+    </label>
+    <br>
+    <label class="switch">
+        Convert to pounds?
+        <input type="checkbox" name="toPound" checked>
+    </label>
+
+<br>
+<p>
+    <input type="submit" value="Submit" />
+</p>
+</form>
+<br>
+{{#valutaConvertion}}
+    <b>{{valutaConvertion}}</b>
+{{/valutaConvertion}}
+<br>
+{{> footer}}
